@@ -2,7 +2,7 @@ include $(TOPDIR)/config.mk
 
 LIB = $(obj)lib$(BOARD).o
 
-COBJS	:= $(BOARD).o ddr_init_table.o kingpin.o
+COBJS	:= $(BOARD).o ddr_init_table.o kingpin.o coherency.o setup.o
 
 SRCS	:= $(SOBJS:.o=.S) $(COBJS:.o=.c)
 OBJS	:= $(addprefix $(obj),$(COBJS))

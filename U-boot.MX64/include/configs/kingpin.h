@@ -94,6 +94,7 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 #endif /* CONFIG_NO_CODE_RELOC */
 //#define CONFIG_BCMHANA_ETH
 //#define CONFIG_NET_MULTI
+#define CONFIG_CMD_LOADB
 
 /* DMA configuration */
 //#define CONFIG_BCM5301X_DMA
@@ -105,11 +106,11 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 #define CONFIG_SYS_BARGSIZE		CONFIG_SYS_CBSIZE
 
 //#define CONFIG_VERSION_VARIABLE	/* Enabled UBOOT build date/time id string */
-//#define CONFIG_AUTO_COMPLETE
+#define CONFIG_AUTO_COMPLETE
 //#define CONFIG_SYS_HUSH_PARSER
 #define CONFIG_SYS_PROMPT_HUSH_PS2	"> "
 #define CONFIG_CMDLINE_EDITING
-//#define CONFIG_SYS_LONGHELP
+#define CONFIG_SYS_LONGHELP
 
 #define CONFIG_CRC32_VERIFY		/* Add crc32 to memory verify commands */
 #define CONFIG_MX_CYCLIC			/* Memory display cyclic */
@@ -124,8 +125,8 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 //#define CONFIG_CMD_NFS
 //#undef CONFIG_GENERIC_MMC
 //#define CONFIG_CMD_PING
-//#define CONFIG_CMD_MEMORY
-//#define CONFIG_CMD_MISC
+#define CONFIG_CMD_MEMORY
+#define CONFIG_CMD_MISC
 //#define CONFIG_CMD_LICENSE
 
 #undef CONFIG_ETHADDR
@@ -141,7 +142,7 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 #ifdef UBOOT_MDK
 #define CONFIG_GMAC_NUM		2 
 #else
-#define CONFIG_GMAC_NUM		1 
+#define CONFIG_GMAC_NUM		2
 #endif /* UBOOT_MDK */
 
 /* Environment variables */
@@ -206,12 +207,12 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 #define  CONFIG_UART2_INDEX              3
 
 /* USB */
-//#define CONFIG_CMD_USB
-//#define CONFIG_USB_EHCI
-//#define CONFIG_USB_EHCI_IPROC
-//#define CONFIG_USB_STORAGE
-//#define CONFIG_CMD_FAT
-//#define CONFIG_DOS_PARTITION
+#define CONFIG_CMD_USB
+#define CONFIG_USB_EHCI
+#define CONFIG_USB_EHCI_IPROC
+#define CONFIG_USB_STORAGE
+#define CONFIG_CMD_FAT
+#define CONFIG_DOS_PARTITION
 //#define CONFIG_LEGACY_USB_INIT_SEQ
 
 /* PCIE */
@@ -229,12 +230,12 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 // #define CONFIG_AUTOBOOT_KEYED
 // #define CONFIG_AUTOBOOT_STOP_STR "xyzzy"
 
-#define CONFIG_BOOT_RETRY_TIME 15
-#define CONFIG_RESET_TO_RETRY
+//#define CONFIG_BOOT_RETRY_TIME 15
+//#define CONFIG_RESET_TO_RETRY
 
 /* Sound */
-#define CONFIG_IPROC_I2S
-#define CONFIG_IPROC_PCM
+//#define CONFIG_IPROC_I2S
+//#define CONFIG_IPROC_PCM
 
 /* USB3.0 */
 //#define CONFIG_USB_XHCI_IPROC
@@ -242,7 +243,7 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 /* SATA */
 //#define CONFIG_IPROC_AHCI
 
-#define CONFIG_NS_DMA
+//#define CONFIG_NS_DMA
 
 #include "iproc_common_configs.h"
 
@@ -250,7 +251,7 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 #define MTDPARTS_DEFAULT    "mtdparts=nand_iproc.0:2048k(U-boot),2048k(U-boot-env),2048k(U-boot-backup),2048K(U-boot-env-backup),0x3F700000(ubi)"
 
 #undef CONFIG_BOOTARGS
-#define CONFIG_BOOTARGS     				"console=ttyS0,115200n8 maxcpus=2 mem=512M earlyprintk"
+#define CONFIG_BOOTARGS     				"console=ttyS0,115200n8 earlyprintk"
 #define CONFIG_BAUDRATE 115200
 //#define CONFIG_BOOTARGS     	"console=ttyS0,115200n8 maxcpus=2 mem=512M"
 
@@ -258,7 +259,9 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 //#define CONFIG_BOOTCOMMAND 		"dhcp; run nfsargs; bootm;"	/* UBoot command issued on power up */
 
 // machid=bb8 is from the Broadcom iProc Linux Development Kit Guide Version 0.21
-#define MERAKI_AUTOBOOT_CMD   "nand read 0x60008000 0x500000 0x200000; bootbk 0x60008000 bootkernel2 ; nand read 0x60008000 0x100000 0x200000; bootbk 0x60008000 bootkernel1"
+//#define MERAKI_AUTOBOOT_CMD   "sleep 10; nand read 0x60008000 0x500000 0x200000; bootbk 0x60008000 bootkernel2 ; nand read 0x60008000 0x100000 0x200000; bootbk 0x60008000 bootkernel1"
+
+#define MERAKI_AUTOBOOT_CMD 	"sleep 3; mx64init; usbload; nand read 0x60008000 0x100000 0x300000; bootbk 0x60008000 bootkernel2"
 
 #define CONFIG_IDENT_STRING   "Meraki MX64 Boot Kernel Loader"
 
@@ -331,21 +334,21 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 #define CONFIG_SHMOO_REUSE_MEMTEST_START        IPROC_DDR_MEM_BASE2
 #endif /* CONFIG_RUN_DDR_SHMOO2 */
 
-#undef CONFIG_GZIP
-#undef CONFIG_GZIP_COMPRESSED
-#undef CONFIG_LZO
+//#undef CONFIG_GZIP
+#define CONFIG_GZIP_COMPRESSED
+#define CONFIG_LZMA
 #undef CONFIG_CMD_LICENSE
-#undef CONFIG_AUTO_COMPLETE
-#undef CONFIG_CMD_IMPORTENV
-#undef CONFIG_CMD_EXPORTENV
-#undef CONFIG_CMD_MEMORY
+#define CONFIG_AUTO_COMPLETE
+//#undef CONFIG_CMD_IMPORTENV
+//#undef CONFIG_CMD_EXPORTENV
+//#undef CONFIG_CMD_MEMORY
 #undef CONFIG_SYS_VSNPRINTF
 #undef CONFIG_CMD_UBI
 #undef CONFIG_CMD_NET
 #undef CONFIG_CMD_PING
 #undef CONFIG_CMD_MTDPARTS
 #undef CONFIG_MTD_DEVICE
-#define CONFIG_SYS_NO_BOOTM
+//#define CONFIG_SYS_NO_BOOTM
 #undef CONFIG_BOOTM_NETBSD
 #undef CONFIG_HAS_POST
 #undef CONFIG_POST_STD_LIST
@@ -356,7 +359,7 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 
 
 /* USB */
-#undef CONFIG_CMD_USB
+//#undef CONFIG_CMD_USB
 
 /* PCIE */
 #undef CONFIG_CMD_PCI
@@ -371,7 +374,7 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 #undef CONFIG_IPROC_MMC
 
 /* USB3.0 */
-#undef CONFIG_USB_XHCI_IPROC
+//#undef CONFIG_USB_XHCI_IPROC
 
 /* QSPI */
 #undef CONFIG_CMD_SPI
@@ -385,23 +388,25 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 #undef CONFIG_MTD_DEVICE               /* needed for mtdparts commands */
 #undef CONFIG_MTD_PARTITIONS
 #undef CONFIG_CMD_MTDPARTS
-#undef CONFIG_LZO
+#define CONFIG_LZO
 #undef CONFIG_CMD_ELF
-#undef CONFIG_FIT
-#undef CONFIG_OF_LIBFDT
+#define CONFIG_FIT
+#define CONFIG_OF_LIBFDT
+#define CONFIG_CMD_BOOTZ
+//#define CONFIG_CMD_BOOTELF
 
 /* libnet */
-#undef CONFIG_BCMIPROC_ETH
-#undef CONFIG_NET_MULTI
-#undef CONFIG_CMDLINE_EDITING
-#undef CONFIG_SYS_LONGHELP
+//#undef CONFIG_BCMIPROC_ETH
+//#undef CONFIG_NET_MULTI
+//#undef CONFIG_CMDLINE_EDITING
+//#undef CONFIG_SYS_LONGHELP
 #undef CONFIG_CMD_NFS
 
 /* lib fs */
 #undef CONFIG_CMD_CRAMFS
-#undef CONFIG_CMD_EXT4
+#define CONFIG_CMD_EXT4
 #undef CONFIG_CMD_EXT2
-#undef CONFIG_CMD_FAT
+#define CONFIG_CMD_FAT
 #undef CONFIG_CMD_FDOS
 #undef CONFIG_CMD_JFFS2
 #undef CONFIG_CMD_REISER
@@ -410,9 +415,9 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 #undef CONFIG_CMD_ZFS
 
 /* libdisk */
-#undef CONFIG_PARTITIONS
+//#undef CONFIG_PARTITIONS
 #undef CONFIG_MAC_PARTITION
-#undef CONFIG_DOS_PARTITION
+//#undef CONFIG_DOS_PARTITION
 #undef CONFIG_ISO_PARTITION
 #undef CONFIG_AMIGA_PARTITION
 #undef CONFIG_EFI_PARTITION
@@ -439,7 +444,7 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 #undef CONFIG_FPGA
 
 /* libgpio */
-#undef CONFIG_IPROC_GPIO
+//#define CONFIG_IPROC_GPIO
 
 /* libi2c */
 #undef CONFIG_CMD_I2C
@@ -464,8 +469,8 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 #undef CONFIG_CMD_ITEST
 
 #undef CONFIG_SYS_HUSH_PARSER
-#undef CONFIG_ZLIB
-#undef CONFIG_CMD_BOOTM
+//#define CONFIG_ZLIB
+//#undef CONFIG_CMD_BOOTM
 #undef CONFIG_EXTRA_ENV_SETTINGS
 #undef MTDPARTS_DEFAULT
 #undef CONFIG_USB_TTY
