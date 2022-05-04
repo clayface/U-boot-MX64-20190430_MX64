@@ -38,15 +38,15 @@ COBJS-$(CONFIG_SERIAL_MULTI) += serial.o
 ifndef CONFIG_SYS_NO_BOOTM
 COBJS-y += xyzModem.o
 endif
-#COBJS-y += cmd_disk.o
+COBJS-y += cmd_disk.o
 
 # core command
 ifndef CONFIG_SYS_NO_BOOTM
 COBJS-y += cmd_boot.o
 COBJS-$(CONFIG_CMD_BOOTM) += cmd_bootm.o
 endif
-#COBJS-y += cmd_help.o
-#COBJS-y += cmd_nvedit.o
+COBJS-y += cmd_help.o
+COBJS-y += cmd_nvedit.o
 COBJS-y += cmd_version.o
 
 # environment

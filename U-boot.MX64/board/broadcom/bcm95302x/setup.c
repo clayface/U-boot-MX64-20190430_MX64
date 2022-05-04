@@ -67,7 +67,7 @@ int dma_init(void)
 	return (__raw_writel(0x0, IPROC_IDM_DMAC_RESET_CONTROL));
 };
 */
-int led_flash(void)
+int led_flash(int time)
 {
 	uint32_t out;
 	uint32_t outen;
@@ -84,73 +84,69 @@ int led_flash(void)
 		out ^= ( 1 << 0 ); outen ^= ( 1 << 31 );
 		__raw_writel(out, ChipcommonA_GPIOOut);
 		__raw_writel(outen, ChipcommonA_GPIOOutEn);
-		mdelay(250);
+		mdelay(time);
 	};
+};
+
+int get_socrev(void)
+{
+	uint32_t regData = __raw_readl(ICFG_CHIP_ID_REG);
+	uint32_t tmp = ((regData & 0x000F0000) >> 16);
+	if (4 <= tmp)
+		return 1;
+	else
+		return 0;
 };
 
 int usb_boot(void)
 {
-	uint32_t regData;
-	uint32_t tmp;
-	tmp = __raw_readl(ChipcommonA_GPIOInput);
-	tmp = tmp & (1 << 6);
-//	printf("tmp = %08X\n", tmp);
-	if (tmp == 0) {
-		printf("\nRESET pressed: USB boot enabled\n");
-
-
+//	uint32_t regData;
+//	uint32_t tmp;
 //	tmp = __raw_readl(ChipcommonA_GPIOInput);
-//        if (tmp & (1 << 6) == 0 ) {
-//                printf("\nRESET pressed: USB boot enabled\n");
-//}
-/*
-regData = __raw_readl(0x1803f1c0);
-printf("0x1803f1c0 = %08X\n", regData);
-regData = __raw_readl(0x18000060);
-printf("0x18000060 = %08X\n", regData);
-regData = __raw_readl(0x18000064);
-printf("0x18000064 = %08X\n", regData);
-regData = __raw_readl(0x18000068);
-printf("0x18000068 = %08X\n", regData);
-regData = __raw_readl(0x18000070);
-printf("0x18000070 = %08X\n", regData);
-regData = __raw_readl(0x18000074);
-printf("0x18000074 = %08X\n", regData);
-regData = __raw_readl(0x18000078);
-printf("0x18000078 = %08X\n", regData);
-regData = __raw_readl(0x1800007c);
-printf("0x1800007c = %08X\n", regData);
-	tmp ^= ( 1 << 31 ); tmp ^= ( 1 << 0 );
-	__raw_writel(tmp, ChipcommonA_GPIOOutEn);
-*/
-		led_flash();
-
-		regData = __raw_readl(ICFG_CHIP_ID_REG);
-		tmp = ((regData & 0x000F0000) >> 16);
+//	tmp = tmp & (1 << 6);
+//	if (tmp == 0) {
+//		printf("\nRESET pressed: USB boot enabled\n");
+		led_flash(250);
 
 		run_command("usb start", 0);
 
-		if (4 <= tmp) {
-			run_command("fatload usb 0:1 0x60008000 \
-			openwrt-bcm5862x-generic-meraki_mx64-initramfs-kernel.bin", 0);
+		if (get_socrev() == 1) {
+			run_command("fatload usb 0:1 ${loadaddr} \
+			${initramfs_filename}", 0);
 		}
 		else {
-			run_command("fatload usb 0:1 0x60008000 \
-			openwrt-bcm5862x-generic-meraki_mx64a0-initramfs-kernel.bin", 0);
+			run_command("fatload usb 0:1 ${loadaddr} \
+			${initramfs_filename_a0}", 0);
 		}
-		run_command("bootbk 0x60008000 bootkernel2", 0);
-	};
+		run_command("bootm ${loadaddr}#${config_dts}", 0);
+//	};
 
 	return 0;
 };
+
+int rst_check(void)
+{
+	uint32_t regData;
+	uint32_t tmp;
+	tmp =  __raw_readl(ChipcommonA_GPIOInput);
+	tmp = tmp & (1 << 6);
+	return tmp;
+}
 
 int dev_init(void)
 {
 	do_ccsetup();
 	periph_enable();
 	ehci_init();
-//	usb_boot();
 
+	if (rst_check() == 0) {
+		printf("\nRESET pressed: USB boot enabled\n");
+		if (usb_boot() == 1)
+			if (rst_check() == 0) {
+				led_flash(100);
+				run_command_list("env default -a -f && saveenv", -1, 0);
+			}
+	}
 	return 0;
 }
 
@@ -160,4 +156,8 @@ U_BOOT_CMD(
 
 U_BOOT_CMD(
 	usbload, 1, 0, usb_boot, "",""
+);
+
+U_BOOT_CMD(
+        getsocrev, 1, 0, get_socrev, "",""
 );

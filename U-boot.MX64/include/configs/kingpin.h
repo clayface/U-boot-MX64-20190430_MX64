@@ -5,7 +5,7 @@
 
 #define CONFIG_BOARD_EARLY_INIT_F (1)
 #define CONFIG_BOARD_LATE_INIT
-#define CONFIG_PHYS_SDRAM_1_SIZE			0x02000000 /* 32 MB */
+#define CONFIG_PHYS_SDRAM_1_SIZE			0x80000000
 #define IPROC_ETH_MALLOC_BASE 0xD00000
 
 #define STDK_BUILD (1)
@@ -81,9 +81,9 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 
 #define CONFIG_ENV_OVERWRITE	/* Allow serial# and ethernet mac address to be overwritten in nv storage */
 #ifdef CONFIG_L2C_AS_RAM
-#define CONFIG_ENV_SIZE			0x1000 /* 4K */
+#define CONFIG_ENV_SIZE			0x40000
 #else
-#define CONFIG_ENV_SIZE			0x10000 /* 64K */
+#define CONFIG_ENV_SIZE			0x40000
 #endif /* CONFIG_L2C_AS_RAM */
 /* NO flash */
 #define CONFIG_SYS_NO_FLASH		/* Not using NAND/NOR unmanaged flash */
@@ -107,7 +107,7 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 
 //#define CONFIG_VERSION_VARIABLE	/* Enabled UBOOT build date/time id string */
 #define CONFIG_AUTO_COMPLETE
-//#define CONFIG_SYS_HUSH_PARSER
+#define CONFIG_SYS_HUSH_PARSER
 #define CONFIG_SYS_PROMPT_HUSH_PS2	"> "
 #define CONFIG_CMDLINE_EDITING
 #define CONFIG_SYS_LONGHELP
@@ -148,8 +148,8 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 /* Environment variables */
 #undef CONFIG_ENV_IS_NOWHERE
 #define CONFIG_ENV_IS_IN_NAND                   1
-#define CONFIG_ENV_OFFSET                       0x180000
-#define CONFIG_ENV_RANGE                        0x080000
+#define CONFIG_ENV_OFFSET                       0x440000
+#define CONFIG_ENV_RANGE                        0x040000
 
 /* Environment variables for NAND flash */
 #define CONFIG_CMD_NAND 
@@ -158,12 +158,12 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 #define CONFIG_SYS_NAND_BASE		        0xdeadbeef
 #define CONFIG_SYS_NAND_ONFI_DETECTION
 
-//#define CONFIG_CMD_UBI
-//#define CONFIG_CMD_UBIFS
-//#define CONFIG_RBTREE
-//#define CONFIG_MTD_DEVICE               /* needed for mtdparts commands */
-//#define CONFIG_MTD_PARTITIONS
-//#define CONFIG_CMD_MTDPARTS
+#define CONFIG_CMD_UBI
+#define CONFIG_CMD_UBIFS
+#define CONFIG_RBTREE
+#define CONFIG_MTD_DEVICE               /* needed for mtdparts commands */
+#define CONFIG_MTD_PARTITIONS
+#define CONFIG_CMD_MTDPARTS
 
 #define CONFIG_CMD_CACHE
 //#define CONFIG_CMD_ELF
@@ -247,23 +247,38 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 
 #include "iproc_common_configs.h"
 
-#undef MTDPARTS_DEFAULT
-#define MTDPARTS_DEFAULT    "mtdparts=nand_iproc.0:2048k(U-boot),2048k(U-boot-env),2048k(U-boot-backup),2048K(U-boot-env-backup),0x3F700000(ubi)"
+//#define MTDPARTS_DEFAULT    "mtdparts=nand_iproc.0:2048k(U-boot),2048k(U-boot-env),2048k(U-boot-backup),2048K(U-boot-env-backup),0x3F700000(ubi)"
+#define MTDPARTS_DEFAULT    "mtdparts=nand_iproc.0:0x3F700000@0x800000(ubi)"
 
 #undef CONFIG_BOOTARGS
 #define CONFIG_BOOTARGS     				"console=ttyS0,115200n8 earlyprintk"
 #define CONFIG_BAUDRATE 115200
 //#define CONFIG_BOOTARGS     	"console=ttyS0,115200n8 maxcpus=2 mem=512M"
 
-#define CONFIG_BOOTDELAY		5	/* User can hit a key to abort kernel boot and stay in uboot cmdline */
+#define CONFIG_BOOTDELAY		3	/* User can hit a key to abort kernel boot and stay in uboot cmdline */
 //#define CONFIG_BOOTCOMMAND 		"dhcp; run nfsargs; bootm;"	/* UBoot command issued on power up */
 
 // machid=bb8 is from the Broadcom iProc Linux Development Kit Guide Version 0.21
 //#define MERAKI_AUTOBOOT_CMD   "sleep 10; nand read 0x60008000 0x500000 0x200000; bootbk 0x60008000 bootkernel2 ; nand read 0x60008000 0x100000 0x200000; bootbk 0x60008000 bootkernel1"
 
-#define MERAKI_AUTOBOOT_CMD 	"sleep 3; mx64init; usbload; nand read 0x60008000 0x100000 0x300000; bootbk 0x60008000 bootkernel2"
-
+//#define MERAKI_AUTOBOOT_CMD 	"sleep 3; mx64init; usbload; nand read 0x60008000 0x100000 0x300000; bootbk 0x60008000 bootkernel2"
+#define CONFIG_BOOTCOMMAND     "run soc_dtscheck; mx64init; run ubi_checkboot; run usb_checkboot; run meraki_checkboot"
 #define CONFIG_IDENT_STRING   "Meraki MX64 Boot Kernel Loader"
+
+#define CONFIG_EXTRA_ENV_SETTINGS \
+       "ubi_boot=ubi part ubi && ubi read ${loadaddr} kernel && bootm ${loadaddr}#${config_dts}\0" \
+        "meraki_bootkernel2=nand read 0x60008000 0x500000 0x300000; bootbk 0x60008000 bootkernel2\0" \
+        "meraki_bootkernel1=nand read 0x60008000 0x100000 0x300000; bootbk 0x60008000 bootkernel1\0" \
+        "initramfs_filename=openwrt-bcm53xx-generic-meraki_mx64-initramfs.bin\0" \
+        "initramfs_filename_a0=openwrt-bcm53xx-generic-meraki_mx64_a0-initramfs.bin\0" \
+        "ubi_checkboot=if test $disable_ubi_boot != 1; then run ubi_boot ; fi\0" \
+        "usb_checkboot=if test $enable_usb_boot = 1; then usbload; fi\0" \
+        "meraki_checkboot=if test $enable_meraki_boot = 1; then run meraki_bootkernel2; run meraki_bootkernel1; fi\0" \
+        "disable_ubi_boot=0\0" \
+        "enable_usb_boot=1\0" \
+        "enable_meraki_boot=0\0" \
+        "mtdparts=" MTDPARTS_DEFAULT "\0" \
+        "soc_dtscheck=if test -n config_dts; then getsocrev; if test $? = 1 ; then setenv config_dts config@4; else setenv config_dts config@2; fi; fi"
 
 //#define CONFIG_EXTRA_ENV_SETTINGS \
 //    "brcmtag=1\0"                 \
@@ -323,7 +338,7 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 //#endif
 #undef CONFIG_SHMOO_REUSE_QSPI_OFFSET
 /* Offset of NAND flash to save Shmoo values */
-#define CONFIG_SHMOO_REUSE_NAND_OFFSET          0x00080000
+#define CONFIG_SHMOO_REUSE_NAND_OFFSET          0x00480000
 /* Range for the partition to support NAND bad blocks replacement */
 #define CONFIG_SHMOO_REUSE_NAND_RANGE           0x00080000
 /* Delay to wait for the magic character to force Shmoo; 0 to disable delay */
@@ -343,11 +358,11 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 //#undef CONFIG_CMD_EXPORTENV
 //#undef CONFIG_CMD_MEMORY
 #undef CONFIG_SYS_VSNPRINTF
-#undef CONFIG_CMD_UBI
+//#undef CONFIG_CMD_UBI
 #undef CONFIG_CMD_NET
 #undef CONFIG_CMD_PING
-#undef CONFIG_CMD_MTDPARTS
-#undef CONFIG_MTD_DEVICE
+//#undef CONFIG_CMD_MTDPARTS
+//#undef CONFIG_MTD_DEVICE
 //#define CONFIG_SYS_NO_BOOTM
 #undef CONFIG_BOOTM_NETBSD
 #undef CONFIG_HAS_POST
@@ -383,11 +398,11 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 /* MDIO */
 #undef CONFIG_IPROC_MDIO
 
-#undef CONFIG_CMD_UBIFS
-#undef CONFIG_RBTREE
-#undef CONFIG_MTD_DEVICE               /* needed for mtdparts commands */
-#undef CONFIG_MTD_PARTITIONS
-#undef CONFIG_CMD_MTDPARTS
+//#undef CONFIG_CMD_UBIFS
+//#undef CONFIG_RBTREE
+//#undef CONFIG_MTD_DEVICE               /* needed for mtdparts commands */
+//#undef CONFIG_MTD_PARTITIONS
+//#undef CONFIG_CMD_MTDPARTS
 #define CONFIG_LZO
 #undef CONFIG_CMD_ELF
 #define CONFIG_FIT
@@ -411,7 +426,7 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 #undef CONFIG_CMD_JFFS2
 #undef CONFIG_CMD_REISER
 #undef CONFIG_YAFFS2
-#undef CONFIG_CMD_UBIFS
+//#undef CONFIG_CMD_UBIFS
 #undef CONFIG_CMD_ZFS
 
 /* libdisk */
@@ -468,11 +483,10 @@ When DEBUG is enabled, need to disable both CACHE to make u-boot running
 #undef CONFIG_ETHADDR
 #undef CONFIG_CMD_ITEST
 
-#undef CONFIG_SYS_HUSH_PARSER
 //#define CONFIG_ZLIB
 //#undef CONFIG_CMD_BOOTM
-#undef CONFIG_EXTRA_ENV_SETTINGS
-#undef MTDPARTS_DEFAULT
+//#undef CONFIG_EXTRA_ENV_SETTINGS
+//#undef MTDPARTS_DEFAULT
 #undef CONFIG_USB_TTY
 
 #endif /* __KINGPIN_H */

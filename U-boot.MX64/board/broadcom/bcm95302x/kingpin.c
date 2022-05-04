@@ -143,13 +143,13 @@ static void led_set_rgb(int red, int green, int blue)
 void venom_setup(void)
 {
 }
-
+/*
 void pre_command_hook(void)
 {
 	run_command_list (MERAKI_AUTOBOOT_CMD, -1, 0);
 	led_set_rgb(255, 0, 0);
 }
-
+*/
 void
 NetReceive(uchar *inpkt, int len)
 {
@@ -164,7 +164,7 @@ int eth_register(struct eth_device *dev)
 {
    return 0;
 }
-
+/*
 char *getenv(const char *name)
 { return NULL; }
 
@@ -177,10 +177,10 @@ int setenv(const char *varname, const char *varvalue)
 int env_check_apply(const char *name, const char *oldval,
 			const char *newval, int flag)
 { return 1; }
+*/
+//ulong load_addr = CONFIG_SYS_LOAD_ADDR;	/* Default Load Address */
 
-ulong load_addr = CONFIG_SYS_LOAD_ADDR;	/* Default Load Address */
-
-//int himport_r(struct hsearch_data *htab,
+//bint himport_r(struct hsearch_data *htab,
 //		const char *env, size_t size, const char sep, int flag,
 //		int nvars, char * const vars[], int do_apply)
 //{ return 0; }
